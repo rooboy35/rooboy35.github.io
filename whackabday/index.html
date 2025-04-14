@@ -13,12 +13,12 @@
       padding-top: 20px;
     }
     h1 {
-      color: #ffffff;
-      text-shadow: 3px 3px 6px #000000;
+      color: #7DF9FF;
+      text-shadow: 3px 3px 10px #000000;
     }
     .game-container {
       display: grid;
-      grid-template-columns: repeat(3, 150px);
+      grid-template-columns: repeat(4, 150px);
       grid-gap: 20px;
       justify-content: center;
       margin-top: 40px;
@@ -47,16 +47,16 @@
       font-size: 28px;
       font-weight: 600;
       margin-top: 20px;
-      color: #ffffff;
-      text-shadow: 2px 2px 4px #000000;
+      color: #7DF9FF;
+      text-shadow: 2px 2px 6px #000000;
     }
     #gameOver {
       display: none;
       margin-top: 30px;
       font-size: 36px;
       font-weight: bold;
-      color: #ffffff;
-      text-shadow: 2px 2px 4px #000000;
+      color: #7DF9FF;
+      text-shadow: 2px 2px 6px #000000;
     }
     .flash-correct, .flash-wrong {
       position: fixed;
@@ -80,12 +80,13 @@
 </head>
 <body>
   <h1>🎉 Whack-a-Birthday! 🎉</h1>
-  <p style="color:white; text-shadow:1px 1px #000;">Whack Sam, Ollie, or Kade — but avoid the others!</p>
+  <p style="color:#7DF9FF; font-size:20px; font-weight:bold; text-shadow:2px 2px 6px #000;">Whack Sam, Ollie, or Kade — but avoid the others!</p>
   <div class="score">Score: <span id="score">0</span></div>
   <div class="timer">Time Left: <span id="timer">30</span> seconds</div>
 
   <div class="game-container" id="game"></div>
 
+  
   <template id="mole-templates">
     <div class="hole" data-name="Sam2" data-type="birthday">
       <img src="faces/Sam1.png" alt="Sam1" class="mole" />
@@ -115,9 +116,20 @@
     <div class="hole" data-name="Decoy3" data-type="decoy">
       <img src="faces/Kizz1.png" alt="Decoy3" class="mole" />
     </div>
+    <div class="hole" data-name="Decoy4" data-type="decoy">
+      <img src="faces/Jimmy1.png" alt="Decoy4" class="mole" />
+    </div>
+    <div class="hole" data-name="Decoy5" data-type="decoy">
+      <img src="faces/Marcus1.png" alt="Decoy5" class="mole" />
+    </div>
+    <div class="hole" data-name="Decoy6" data-type="decoy">
+      <img src="faces/Morgo1.png" alt="Decoy6" class="mole" />
+    </div>
   </template>
 
-  <div id="gameOver">⏰ Time's up! Your final score is <span id="finalScore"></span> 🎉</div>
+
+  <div id="gameOver">
+    <button onclick="window.location.reload()" style="margin-top:20px;padding:10px 20px;font-size:18px;border:none;background:#0077cc;color:white;border-radius:8px;cursor:pointer;">🔄 Play Again</button>⏰ Time's up! Your final score is <span id="finalScore"></span> 🎉</div>
   <div id="flash-correct" class="flash-correct">+1 🎯</div>
   <div id="flash-wrong" class="flash-wrong">-1 ❌</div>
 
@@ -156,6 +168,10 @@
     });
 
     function showFlash(type) {
+      const sound = type === "correct"
+        ? document.getElementById("sound-correct")
+        : document.getElementById("sound-wrong");
+      if (sound) sound.play();
       const el = type === "correct" ? flashCorrect : flashWrong;
       el.style.display = "block";
       setTimeout(() => el.style.display = "none", 500);
@@ -204,5 +220,8 @@
 
     startGame();
   </script>
+
+  <audio id="sound-correct" src="sounds/correct.mp3" preload="auto"></audio>
+  <audio id="sound-wrong" src="sounds/wrong.mp3" preload="auto"></audio>
 </body>
 </html>
