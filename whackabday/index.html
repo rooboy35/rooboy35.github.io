@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +19,10 @@
     }
     .game-container {
       display: grid;
-      grid-template-columns: repeat(4, 1fr); max-width: 640px; margin-left: auto; margin-right: auto;
+      grid-template-columns: repeat(4, 1fr); 
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
       grid-gap: 20px;
       justify-content: center;
       margin-top: 40px;
@@ -76,74 +80,39 @@
     .flash-wrong {
       color: #ff4d4d;
     }
-  
-    @media (max-width: 600px) {
-      .score, .timer {
-        font-size: 20px;
-      }
-      .flash-correct, .flash-wrong {
-        font-size: 32px;
-      }
-      h1 {
-        font-size: 22px;
-      }
-    }
-    </style>
+  </style>
 </head>
 <body>
   <h1>🎉 Whack-a-Birthday! 🎉</h1>
   <p style="color:#001EFF; font-size:20px; font-weight:bold; text-shadow:1px 1px 2px #000;">Whack Sam, Ollie, or Kade — but avoid the others!</p>
   <div class="score">Score: <span id="score">0</span></div>
   <div class="timer">Time Left: <span id="timer">30</span> seconds</div>
-
   <div class="game-container" id="game"></div>
 
-  
   <template id="mole-templates">
-    <div class="hole" data-name="Sam2" data-type="birthday">
-      <img src="faces/Sam1.png" alt="Sam1" class="mole" />
-    </div>
-    <div class="hole" data-name="Sa2" data-type="birthday">
-      <img src="faces/Sam2.png" alt="Sam2" class="mole" />
-    </div>
-    <div class="hole" data-name="Ollie1" data-type="birthday">
-      <img src="faces/Ollie1.png" alt="Ollie1" class="mole" />
-    </div>
-    <div class="hole" data-name="Ollie2" data-type="birthday">
-      <img src="faces/Ollie2.png" alt="Ollie2" class="mole" />
-    </div>
-    <div class="hole" data-name="Ollie3" data-type="birthday">
-      <img src="faces/Ollie3.png" alt="Ollie3" class="mole" />
-    </div>
-    <div class="hole" data-name="Kade1" data-type="birthday">
-      <img src="faces/Kade1.png" alt="Kade1" class="mole" />
-    </div>
-    <!-- Decoys -->
-    <div class="hole" data-name="Decoy1" data-type="decoy">
-      <img src="faces/Deano1.png" alt="Decoy1" class="mole" />
-    </div>
-    <div class="hole" data-name="Decoy2" data-type="decoy">
-      <img src="faces/Joe1.png" alt="Decoy2" class="mole" />
-    </div>
-    <div class="hole" data-name="Decoy3" data-type="decoy">
-      <img src="faces/Kizz1.png" alt="Decoy3" class="mole" />
-    </div>
-    <div class="hole" data-name="Decoy4" data-type="decoy">
-      <img src="faces/Jimmy1.png" alt="Decoy4" class="mole" />
-    </div>
-    <div class="hole" data-name="Decoy5" data-type="decoy">
-      <img src="faces/Marcus1.png" alt="Decoy5" class="mole" />
-    </div>
-    <div class="hole" data-name="Decoy6" data-type="decoy">
-      <img src="faces/Morgo1.png" alt="Decoy6" class="mole" />
-    </div>
+    <div class="hole" data-type="birthday"><img src="faces/Sam1.png" class="mole" /></div>
+    <div class="hole" data-type="birthday"><img src="faces/Sam2.png" class="mole" /></div>
+    <div class="hole" data-type="birthday"><img src="faces/Ollie1.png" class="mole" /></div>
+    <div class="hole" data-type="birthday"><img src="faces/Ollie2.png" class="mole" /></div>
+    <div class="hole" data-type="birthday"><img src="faces/Ollie3.png" class="mole" /></div>
+    <div class="hole" data-type="birthday"><img src="faces/Kade1.png" class="mole" /></div>
+    <div class="hole" data-type="decoy"><img src="faces/Deano1.png" class="mole" /></div>
+    <div class="hole" data-type="decoy"><img src="faces/Joe1.png" class="mole" /></div>
+    <div class="hole" data-type="decoy"><img src="faces/Kizz1.png" class="mole" /></div>
+    <div class="hole" data-type="decoy"><img src="faces/Jimmy1.png" class="mole" /></div>
+    <div class="hole" data-type="decoy"><img src="faces/Marcus1.png" class="mole" /></div>
+    <div class="hole" data-type="decoy"><img src="faces/Morgo1.png" class="mole" /></div>
   </template>
 
-
   <div id="gameOver">
-    <button onclick="window.location.reload()" style="margin-top:20px;padding:10px 20px;font-size:18px;border:none;background:#0077cc;color:white;border-radius:8px;cursor:pointer;">🔄 Play Again</button>⏰ Time's up! Your final score is <span id="finalScore"></span> 🎉</div>
+    <button onclick="window.location.reload()">🔄 Play Again</button>
+    ⏰ Time's up! Your final score is <span id="finalScore"></span> 🎉
+  </div>
   <div id="flash-correct" class="flash-correct">+1 🎯</div>
   <div id="flash-wrong" class="flash-wrong">-1 ❌</div>
+
+  <audio id="sound-correct" src="sounds/correct.mp3" preload="auto"></audio>
+  <audio id="sound-wrong" src="sounds/wrong.mp3" preload="auto"></audio>
 
   <script>
     const moles = [];
@@ -158,31 +127,18 @@
     let timeLeft = 30;
     let gameActive = true;
 
-    // Shuffle and load faces
-    function shuffleNodes(nodes) {
-      for (let i = nodes.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [nodes[i], nodes[j]] = [nodes[j], nodes[i]];
-      }
-      return nodes;
-    }
-
     const template = document.getElementById("mole-templates");
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = template.innerHTML;
-    const moleNodes = Array.from(tempDiv.children);
-    const shuffledMoles = shuffleNodes(moleNodes);
+    const shuffled = Array.from(tempDiv.children).sort(() => 0.5 - Math.random());
     const gameContainer = document.getElementById("game");
-
-    shuffledMoles.forEach(node => {
+    shuffled.forEach(node => {
       gameContainer.appendChild(node);
       moles.push(node.querySelector(".mole"));
     });
 
     function showFlash(type) {
-      const sound = type === "correct"
-        ? document.getElementById("sound-correct")
-        : document.getElementById("sound-wrong");
+      const sound = type === "correct" ? document.getElementById("sound-correct") : document.getElementById("sound-wrong");
       if (sound) sound.play();
       const el = type === "correct" ? flashCorrect : flashWrong;
       el.style.display = "block";
@@ -191,32 +147,41 @@
 
     function randomMole() {
       if (!gameActive) return;
-      const mole = moles[Math.floor(Math.random() * moles.length)];
-      mole.classList.add("show");
-      setTimeout(() => {
-        mole.classList.remove("show");
-      }, 900);
+
+      // Clear all first
+      moles.forEach(m => m.classList.remove("show"));
+
+      // Only show 1 or 2 at a time
+      const toShow = [];
+      while (toShow.length < 1) {
+        const mole = moles[Math.floor(Math.random() * moles.length)];
+        if (!toShow.includes(mole)) toShow.push(mole);
+      }
+
+      toShow.forEach(m => {
+        m.classList.add("show");
+        setTimeout(() => m.classList.remove("show"), 800);
+      });
     }
 
     moles.forEach(mole => {
       mole.addEventListener("click", () => {
-        if (mole.classList.contains("show") && gameActive) {
-          const type = mole.parentElement.getAttribute("data-type");
-          if (type === "decoy") {
-            score--;
-            showFlash("wrong");
-          } else {
-            score++;
-            showFlash("correct");
-          }
-          scoreDisplay.textContent = score;
-          mole.classList.remove("show");
+        if (!mole.classList.contains("show") || !gameActive) return;
+        const type = mole.parentElement.dataset.type;
+        if (type === "decoy") {
+          score--;
+          showFlash("wrong");
+        } else {
+          score++;
+          showFlash("correct");
         }
+        scoreDisplay.textContent = score;
+        mole.classList.remove("show");
       });
     });
 
     function startGame() {
-      const moleInterval = setInterval(randomMole, 1000);
+      const moleInterval = setInterval(randomMole, 1100);
       const countdown = setInterval(() => {
         timeLeft--;
         timerDisplay.textContent = timeLeft;
@@ -232,8 +197,5 @@
 
     startGame();
   </script>
-
-  <audio id="sound-correct" src="sounds/correct.mp3" preload="auto"></audio>
-  <audio id="sound-wrong" src="sounds/wrong.mp3" preload="auto"></audio>
 </body>
 </html>
