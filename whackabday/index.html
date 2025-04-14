@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whack-a-Birthday!</title>
+  <style>
+    body {
+      font-family: 'Trebuchet MS', sans-serif;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      text-align: center;
+      padding-top: 20px;
+    }
+    h1 {
+      color: #ffffff;
+      text-shadow: 3px 3px 6px #000000;
+    }
+    .game-container {
+      display: grid;
+      grid-template-columns: repeat(3, 150px);
+      grid-gap: 20px;
+      justify-content: center;
+      margin-top: 40px;
+    }
+    .hole {
+      width: 150px;
+      height: 150px;
+      background-color: #fff;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      border: 3px solid #ccc;
+    }
+    .mole {
+      position: absolute;
+      bottom: -100%;
+      left: 0;
+      width: 100%;
+      transition: bottom 0.3s ease;
+    }
+    .mole.show {
+      bottom: 0;
+    }
+    .score, .timer {
+      font-size: 28px;
+      font-weight: 600;
+      margin-top: 20px;
+      color: #ffffff;
+      text-shadow: 2px 2px 4px #000000;
+    }
+    #gameOver {
+      display: none;
+      margin-top: 30px;
+      font-size: 36px;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 2px 2px 4px #000000;
+    }
+    .flash-correct, .flash-wrong {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 56px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 2px 2px 10px black;
+      z-index: 1000;
+      display: none;
+    }
+    .flash-correct {
+      color: #32cd32;
+    }
+    .flash-wrong {
+      color: #ff4d4d;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎉 Whack-a-Birthday! 🎉</h1>
+  <p style="color:white; text-shadow:1px 1px #000;">Whack Sam, Ollie, or Kade — but avoid the others!</p>
+  <div class="score">Score: <span id="score">0</span></div>
+  <div class="timer">Time Left: <span id="timer">30</span> seconds</div>
+
+  <div class="game-container" id="game"></div>
+
+  <template id="mole-templates">
+    <div class="hole" data-name="Sam2" data-type="birthday">
+      <img src="faces/Sam1.png" alt="Sam1" class="mole" />
+    </div>
+    <div class="hole" data-name="Sa2" data-type="birthday">
+      <img src="faces/Sam2.png" alt="Sam2" class="mole" />
+    </div>
+    <div class="hole" data-name="Ollie1" data-type="birthday">
+      <img src="faces/Ollie1.png" alt="Ollie1" class="mole" />
+    </div>
+    <div class="hole" data-name="Ollie2" data-type="birthday">
+      <img src="faces/Ollie2.png" alt="Ollie2" class="mole" />
+    </div>
+    <div class="hole" data-name="Ollie3" data-type="birthday">
+      <img src="faces/Ollie3.png" alt="Ollie3" class="mole" />
+    </div>
+    <div class="hole" data-name="Kade1" data-type="birthday">
+      <img src="faces/Kade1.png" alt="Kade1" class="mole" />
+    </div>
+    <!-- Decoys -->
+    <div class="hole" data-name="Decoy1" data-type="decoy">
+      <img src="faces/Deano1.png" alt="Decoy1" class="mole" />
+    </div>
+    <div class="hole" data-name="Decoy2" data-type="decoy">
+      <img src="faces/Joe1.png" alt="Decoy2" class="mole" />
+    </div>
+    <div class="hole" data-name="Decoy3" data-type="decoy">
+      <img src="faces/Kizz1.png" alt="Decoy3" class="mole" />
+    </div>
+  </template>
+
+  <div id="gameOver">⏰ Time's up! Your final score is <span id="finalScore"></span> 🎉</div>
+  <div id="flash-correct" class="flash-correct">+1 🎯</div>
+  <div id="flash-wrong" class="flash-wrong">-1 ❌</div>
+
+  <script>
+    const moles = [];
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const gameOver = document.getElementById("gameOver");
+    const finalScore = document.getElementById("finalScore");
+    const flashCorrect = document.getElementById("flash-correct");
+    const flashWrong = document.getElementById("flash-wrong");
+
+    let score = 0;
+    let timeLeft = 30;
+    let gameActive = true;
+
+    // Shuffle and load faces
+    function shuffleNodes(nodes) {
+      for (let i = nodes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nodes[i], nodes[j]] = [nodes[j], nodes[i]];
+      }
+      return nodes;
+    }
+
+    const template = document.getElementById("mole-templates");
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = template.innerHTML;
+    const moleNodes = Array.from(tempDiv.children);
+    const shuffledMoles = shuffleNodes(moleNodes);
+    const gameContainer = document.getElementById("game");
+
+    shuffledMoles.forEach(node => {
+      gameContainer.appendChild(node);
+      moles.push(node.querySelector(".mole"));
+    });
+
+    function showFlash(type) {
+      const el = type === "correct" ? flashCorrect : flashWrong;
+      el.style.display = "block";
+      setTimeout(() => el.style.display = "none", 500);
+    }
+
+    function randomMole() {
+      if (!gameActive) return;
+      const mole = moles[Math.floor(Math.random() * moles.length)];
+      mole.classList.add("show");
+      setTimeout(() => {
+        mole.classList.remove("show");
+      }, 900);
+    }
+
+    moles.forEach(mole => {
+      mole.addEventListener("click", () => {
+        if (mole.classList.contains("show") && gameActive) {
+          const type = mole.parentElement.getAttribute("data-type");
+          if (type === "decoy") {
+            score--;
+            showFlash("wrong");
+          } else {
+            score++;
+            showFlash("correct");
+          }
+          scoreDisplay.textContent = score;
+          mole.classList.remove("show");
+        }
+      });
+    });
+
+    function startGame() {
+      const moleInterval = setInterval(randomMole, 1000);
+      const countdown = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(countdown);
+          clearInterval(moleInterval);
+          gameActive = false;
+          finalScore.textContent = score;
+          gameOver.style.display = "block";
+        }
+      }, 1000);
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
